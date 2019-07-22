@@ -14,14 +14,15 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
     
     let baseURL = "https://apiv2.bitcoinaverage.com/indices/global/ticker/BTC"
     let currencyArray = ["AUD", "BRL","CAD","CNY","EUR","GBP","HKD","IDR","ILS","INR","JPY","MXN","NOK","NZD","PLN","RON","RUB","SEK","SGD","USD","ZAR"]
+    let currencySymbolArray = ["$", "R$", "$", "¥", "€", "£", "$", "Rp", "₪", "₹", "¥", "$", "kr", "$", "zł", "lei", "₽", "kr", "$", "$", "R"]
     var finalURL = ""
+    var currentSymbol = ""
 
     //Pre-setup IBOutlets
     @IBOutlet weak var bitcoinPriceLabel: UILabel!
     @IBOutlet weak var currencyPicker: UIPickerView!
     
 
-    
     override func viewDidLoad() {
         super.viewDidLoad()
         currencyPicker.delegate = self
@@ -43,8 +44,9 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
     }
 
     func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
-        let finalURL = baseURL + currencyArray[row]
-        getPriceData(url: finalURL)
+        finalURL = baseURL + currencyArray[row]
+        currentSymbol = currencySymbolArray[row]
+        getPriceData()
     }
     
     
@@ -52,8 +54,8 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
 //    //MARK: - Networking
 //    /***************************************************************/
     
-    func getPriceData(url: String) {
-        Alamofire.request(url, method: .get)
+    func getPriceData() {
+        Alamofire.request(finalURL, method: .get)
             .responseJSON { response in
                 if response.result.isSuccess {
 
@@ -76,7 +78,9 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
     func updatePriceData(json : JSON) {
         
         if let price = json["ask"].double {
-            bitcoinPriceLabel.text = String(price)
+            bitcoinPriceLabel.text = "\(currentSymbol) \(price)"
+        } else {
+            bitcoinPriceLabel.text = "Price unavaiable"
         }
     }
 }
